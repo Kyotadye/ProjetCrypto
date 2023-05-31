@@ -103,7 +103,7 @@ class Bob:
         compos2 = paillier.oppose(paillier.produitParConstante(paillier.oplus(xAxB, yAyB, self.pk), 2, self.pk), self.pk)
         distance = paillier.oplus(xa2, paillier.oplus(ya2, paillier.oplus(xb2, paillier.oplus(yb2, compos2, self.pk), self.pk), self.pk), self.pk)
         for i in range(10000):
-            randa = randint(1, int(pow(self.pk,0.3)))
+            randa = randint(1, 100)
             calcul = paillier.produitParConstante(randa,paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk),self.pk)
             #calcul = paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk)
             vecteur.append(calcul)
@@ -120,9 +120,9 @@ class Bob:
         compos2 = paillier.oppose(paillier.produitParConstante(paillier.oplus(xAxB, yAyB, self.pk), 2, self.pk), self.pk)
         distance = paillier.oplus(xa2, paillier.oplus(ya2, paillier.oplus(xb2, paillier.oplus(yb2, compos2, self.pk), self.pk), self.pk), self.pk)
         for i in range(10000):
-            randa = randint(1, int(pow(self.pk,0.3)))
-            #calcul = paillier.produitParConstante(randa,paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk),self.pk)
-            calcul = paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk)
+            randa = randint(1, 100)
+            calcul = paillier.produitParConstante(randa,paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk),self.pk)
+            #calcul = paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk)
             vecteur.append([ paillier.oplus(calcul,paillier.encrypt(self.xb,self.pk),self.pk),paillier.oplus(calcul,paillier.encrypt(self.yb,self.pk),self.pk)])
         valeurZ = paillier.oplus(self.encrypt(self.xb),self.encrypt(self.yb),self.pk)
         shuffle(vecteur)
