@@ -33,10 +33,21 @@ class Paillier:
 
         return int(m)
 
+    def oplus(self,X, Y, pk):
+        Z = (X * Y) % (pk * pk)
+        return Z
+
+    def produitParConstante(self,X, y, pk):
+        Z = pow(X, y, pk * pk)
+        return Z
+
+    def oppose(self,X, pk):
+        Z = mod_inverse(X, pk * pk)
+        return Z
+
 class Alice:
-    def __init__(self, paillier,xa=0,ya=0):
-        self.paillier = paillier
-        self.pk, self.sk = self.paillier.genkeys(10)
+    def __init__(self, xa=0,ya=0):
+        self.pk, self.sk = paillier.genkeys(10)
         print("pk = ", self.pk)
         print("sk = ", self.sk)
         print()
@@ -44,31 +55,34 @@ class Alice:
         self.ya = ya
 
     def encrypt(self, x):
-        return self.paillier.encrypt(x, self.pk)
+        return paillier.encrypt(x, self.pk)
 
     def decrypt(self, c):
-        return self.paillier.decrypt(c, self.pk, self.sk)
+        return paillier.decrypt(c, self.pk, self.sk)
 
     def distance(self, res):
-        resu = (self.decrypt(res) + self.xa**2 + self.ya**2)
+        resu = (self.decrypt(res) + pow(self.xa,2) + pow(self.ya,2))
         return resu
 
 class Bob:
-    def __init__(self, paillier, pk, xb=0, yb=0):
+    def __init__(self, pk, xb=0, yb=0):
         self.pk = pk
         self.xb = xb
         self.yb = yb
-        self.paillier = paillier
 
     def distance(self, xa, ya):
-        return self.encrypt(self.xb**2 + self.yb**2 - 2*(xa * self.xb + ya * self.yb))
+        part1 = paillier.oplus(self.encrypt(pow(self.xb,2)),self.encrypt(pow(self.yb,2)),self.pk)
+        somme1 = paillier.oplus(paillier.produitParConstante(xa,self.xb,self.pk)
+                    , paillier.produitParConstante(ya,self.yb,self.pk),self.pk)
+        part2 = paillier.oppose(paillier.produitParConstante(somme1,2,self.pk),self.pk)
+        return paillier.oplus(part1,part2,self.pk)
 
     def encrypt(self, x):
-        return self.paillier.encrypt(x, self.pk)
+        return paillier.encrypt(x, self.pk)
 
 if __name__ == '__main__':
     paillier = Paillier()
-    alice = Alice(paillier,1,1)
-    bob = Bob(paillier,alice.pk,2,2)
+    alice = Alice(1,1)
+    bob = Bob(alice.pk,2,2)
     print(alice.distance(bob.distance(alice.encrypt(alice.xa), alice.encrypt(alice.ya))))
 
