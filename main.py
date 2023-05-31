@@ -45,8 +45,8 @@ class Paillier:
         return Z
 
 class Alice:
-    def __init__(self, xa=0,ya=0):
-        self.pk, self.sk = paillier.genkeys(100)
+    def __init__(self, xa=0,ya=0,taille = 100):
+        self.pk, self.sk = paillier.genkeys(taille)
         print("pk = ", self.pk)
         print("sk = ", self.sk)
         print()
@@ -134,24 +134,33 @@ class Bob:
 
 if __name__ == '__main__':
     paillier = Paillier()
-    alice = Alice(1,1)
-    bob = Bob(alice.pk,99,2)
+    # Coordonnées X et Y et taille de la clé d'ALice
+    alice = Alice(1,1,100)
+    # Clef privée d'Alice et coordonnées X et Y de Bob
+    bob = Bob(alice.pk,5,1)
 
     # Protcole DistanceBob
+    print("Distance entre Alice et Bob : ")
     print(alice.distance(bob.distance(alice.encrypt(alice.xa), alice.encrypt(alice.ya))))
 
+    print(" ")
+
     # Protocole Distance100Bob
-    '''if(alice.checkvecteur(bob.distance100(alice.encrypt(alice.xa),alice.encrypt(alice.ya),
+    print("Le protocole Distance100Bob montre que Bob est : ")
+    if(alice.checkvecteur(bob.distance100(alice.encrypt(alice.xa),alice.encrypt(alice.ya),
                                        alice.encrypt(pow(alice.xa,2)),alice.encrypt(pow(alice.ya,2))))):
-        print("TROP PROCHE")
+        print("trop proche d'Alice (<100)")
     else:
-        print("TROP LOIN")'''
+        print("trop loin d'Alice (>100)")
+
+    print(" ")
 
     # Protocle Distance100BobUpgrade
+    print("Le protocole Distance100BobUpgrade montre que Bob est : ")
     vecteur, valeurZ = bob.distance100upgrade(alice.encrypt(alice.xa),alice.encrypt(alice.ya)
                                                                  ,alice.encrypt(pow(alice.xa,2)),alice.encrypt(pow(alice.ya,2)))
     respossible = alice.checkVecteurPaire(vecteur, valeurZ)
-    if(respossible != None):
-        print(respossible)
+    if respossible != []:
+        print("aux coordonnées suivantes : ",respossible)
     else:
-        print("TROP LOIN")
+        print("trop loin d'Alice (>100)")
