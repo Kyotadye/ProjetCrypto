@@ -70,15 +70,14 @@ class Alice:
                return True
         return False
 
-    def checkVecteurPaire(self,vecteur,valeurZ):
+    def checkVecteurPaire(self,vecteur):
         res = []
         for i in range(len(vecteur)):
             decryptX = self.decrypt(vecteur[i][0])
             decryptY = self.decrypt(vecteur[i][1])
-            calcul = pow((decryptX - self.xa)**2 + (decryptY - self.ya)**2,0.5)
-            if calcul <= 100:
-                if self.decrypt(valeurZ) == decryptY+decryptX:
-                    res = [decryptX,decryptY]
+            decryptZ = self.decrypt(vecteur[i][2])
+            if decryptZ == 0:
+                res = [decryptX,decryptY]
         return res
 
 class Bob:
@@ -112,7 +111,7 @@ class Bob:
 
     def distance100upgrade(self, xa, ya, xa2, ya2):
         vecteur = []
-        vecteurZ = []
+        #vecteurZ = []
         xb2 = self.encrypt(pow(self.xb, 2))
         yb2 = self.encrypt(pow(self.yb, 2))
         xAxB = paillier.produitParConstante(xa,self.xb, self.pk)
@@ -122,12 +121,15 @@ class Bob:
         for i in range(10000):
             randa = randint(1, 100)
             calcul = paillier.produitParConstante(randa,paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk),self.pk)
+            calcul2 = paillier.produitParConstante(randa,paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk),self.pk)
+            calcul3 = paillier.produitParConstante(randa,paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk),self.pk)
+
             #calcul = paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk)
-            vecteur.append([ paillier.oplus(calcul,paillier.encrypt(self.xb,self.pk),self.pk),paillier.oplus(calcul,paillier.encrypt(self.yb,self.pk),self.pk)])
-        valeurZ = paillier.oplus(self.encrypt(self.xb),self.encrypt(self.yb),self.pk)
+            vecteur.append([ paillier.oplus(calcul,paillier.encrypt(self.xb,self.pk),self.pk),paillier.oplus(calcul2,paillier.encrypt(self.yb,self.pk),self.pk),calcul3])
+        #valeurZ = paillier.oplus(self.encrypt(self.xb),self.encrypt(self.yb),self.pk)
         shuffle(vecteur)
-        shuffle(vecteurZ)
-        return vecteur, valeurZ
+        #shuffle(vecteurZ)
+        return vecteur
 
     def encrypt(self, x):
         return paillier.encrypt(x, self.pk)
@@ -157,9 +159,9 @@ if __name__ == '__main__':
 
     # Protocle Distance100BobUpgrade
     print("Le protocole Distance100BobUpgrade montre que Bob est : ")
-    vecteur, valeurZ = bob.distance100upgrade(alice.encrypt(alice.xa),alice.encrypt(alice.ya)
+    vecteur = bob.distance100upgrade(alice.encrypt(alice.xa),alice.encrypt(alice.ya)
                                                                  ,alice.encrypt(pow(alice.xa,2)),alice.encrypt(pow(alice.ya,2)))
-    respossible = alice.checkVecteurPaire(vecteur, valeurZ)
+    respossible = alice.checkVecteurPaire(vecteur)
     if respossible != []:
         print("aux coordonnées suivantes : ",respossible)
     else:
