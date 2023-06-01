@@ -73,10 +73,10 @@ class Alice:
     def checkVecteurPaire(self,vecteur):
         res = []
         for i in range(len(vecteur)):
-            decryptX = self.decrypt(vecteur[i][0])
-            decryptY = self.decrypt(vecteur[i][1])
             decryptZ = self.decrypt(vecteur[i][2])
             if decryptZ == 0:
+                decryptX = self.decrypt(vecteur[i][0])
+                decryptY = self.decrypt(vecteur[i][1])
                 res = [decryptX,decryptY]
         return res
 
