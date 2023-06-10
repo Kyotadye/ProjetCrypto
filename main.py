@@ -96,6 +96,7 @@ class Bob:
         self.yb = yb
 
     def distance(self, xa, ya):
+        # On calcule la distance avec les coordonnée d'Alice encryptées
         part1 = paillier.oplus(self.encrypt(pow(self.xb,2)),self.encrypt(pow(self.yb,2)),self.pk)
         somme1 = paillier.oplus(paillier.produitParConstante(xa,self.xb,self.pk)
                     , paillier.produitParConstante(ya,self.yb,self.pk),self.pk)
@@ -104,6 +105,7 @@ class Bob:
 
     def distance100(self, xa, ya, xa2, ya2):
         vecteur = []
+        # On recalcule la distance
         xb2 = self.encrypt(pow(self.xb, 2))
         yb2 = self.encrypt(pow(self.yb, 2))
         xAxB = paillier.produitParConstante(xa,self.xb, self.pk)
@@ -111,16 +113,16 @@ class Bob:
         compos2 = paillier.oppose(paillier.produitParConstante(paillier.oplus(xAxB, yAyB, self.pk), 2, self.pk), self.pk)
         distance = paillier.oplus(xa2, paillier.oplus(ya2, paillier.oplus(xb2, paillier.oplus(yb2, compos2, self.pk), self.pk), self.pk), self.pk)
         for i in range(10000):
+            # On créé notre vecteur en faisant (distance - encrypt(i)) * rand
             randa = randint(1, self.pk)
             calcul = paillier.produitParConstante(paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk),randa,self.pk)
-            #calcul = paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk)
             vecteur.append(calcul)
+        # On range aléatoirement notre vecteur
         shuffle(vecteur)
         return vecteur
 
     def distance100upgrade(self, xa, ya, xa2, ya2):
         vecteur = []
-        #vecteurZ = []
         xb2 = self.encrypt(pow(self.xb, 2))
         yb2 = self.encrypt(pow(self.yb, 2))
         xAxB = paillier.produitParConstante(xa,self.xb, self.pk)
@@ -128,23 +130,25 @@ class Bob:
         compos2 = paillier.oppose(paillier.produitParConstante(paillier.oplus(xAxB, yAyB, self.pk), 2, self.pk), self.pk)
         distance = paillier.oplus(xa2, paillier.oplus(ya2, paillier.oplus(xb2, paillier.oplus(yb2, compos2, self.pk), self.pk), self.pk), self.pk)
         for i in range(10000):
+            # On créé notre premiere composante en faisant (distance - encrypt(i)) * rand
             randa = randint(1, self.pk)
             calcul = paillier.produitParConstante(paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk),randa,self.pk)
+            # On créé notre seconde composante en faisant (distance - encrypt(i)) * rand
             randa = randint(1, self.pk)
             calcul2 = paillier.produitParConstante(paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk),randa,self.pk)
+            # On créé notre troisieme composante en faisant (distance - encrypt(i)) * rand
             randa = randint(1, self.pk)
             calcul3 = paillier.produitParConstante(paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk),randa,self.pk)
 
-            #calcul = paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk)
+            # On créé notre veteur final en ajoutant xb encrypté pour la premiere composante, en ajoutant yb encrypte pour la seconde composante, et en ajoutant la troisieme composante
             vecteur.append([ paillier.oplus(calcul,paillier.encrypt(self.xb,self.pk),self.pk),paillier.oplus(calcul2,paillier.encrypt(self.yb,self.pk),self.pk),calcul3])
-        #valeurZ = paillier.oplus(self.encrypt(self.xb),self.encrypt(self.yb),self.pk)
         shuffle(vecteur)
-        #shuffle(vecteurZ)
         return vecteur
 
     def encrypt(self, x):
         return paillier.encrypt(x, self.pk)
 
+# Classe pour la partie 2 ou Alice ne possède plus la capacité de décrypter
 class AlicePart2:
     def __init__(self,pk,paillierMult, xa=0,ya=0,xbcrypt=0,ybcrypt=0):
         self.pk = pk
@@ -171,9 +175,9 @@ class AlicePart2:
         compos2 = paillier.oppose(paillier.produitParConstante(paillier.oplus(xAxB, yAyB, self.pk), 2, self.pk), self.pk)
         distance = paillier.oplus(xa2, paillier.oplus(ya2, paillier.oplus(xb2, paillier.oplus(yb2, compos2, self.pk), self.pk), self.pk), self.pk)
         for i in range(10000):
+            # Calcul de distance - encrypt(i) * randa pour faire notre vecteur de distance
             randa = (randint(1, self.pk))
             calcul = paillier.produitParConstante(paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk),randa,self.pk)
-            #calcul = paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk)
             vecteur.append(calcul)
         shuffle(vecteur)
         return vecteur
@@ -191,21 +195,23 @@ class AlicePart2:
         compos2 = paillier.oppose(paillier.produitParConstante(paillier.oplus(xAxB, yAyB, self.pk), 2, self.pk), self.pk)
         distance = paillier.oplus(xa2, paillier.oplus(ya2, paillier.oplus(xb2, paillier.oplus(yb2, compos2, self.pk), self.pk), self.pk), self.pk)
         for i in range(10000):
+            # Calcul de distance - encrypt(i) * randa pour faire notre vecteur de distance auquel on ajoute un random encrypté
             randa = (randint(1, self.pk))
             randa2 = (randint(1, self.pk))
             calcul = paillier.oplus(paillier.produitParConstante(paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk),randa,self.pk),self.encrypt(randa2),self.pk)
             self.tabRandom.append(randa2)
-            #calcul = paillier.oplus(distance, paillier.oppose(paillier.encrypt(i, self.pk), self.pk), self.pk)
             vecteur.append(calcul)
         shuffle(vecteur)
         return vecteur
 
+    # fonction pour recevoir le vecteur de distance de Bob de la q1
     def receiveVecteur(self,xbc,ybc):
         if xbc == 0 and ybc == 0:
             return True
         else:
             return False
 
+    # fonction pour recevoir le vecteur de distance de Bob de la q3
     def receiveVecteur2(self,vecteur):
         for i in range(len(vecteur)):
             for j in range(len(self.tabRandom)):
@@ -213,6 +219,7 @@ class AlicePart2:
                     return self.encrypt(0)
         return self.encrypt(1)
 
+    # fonction pour recevoir le vecteur de distance de Bob de la q5
     def receiveVecteur3(self,vecteur):
         for i in range(len(vecteur)):
             for j in range(len(self.tabRandom)):
@@ -255,6 +262,7 @@ class BobPart2:
 
 
 if __name__ == '__main__':
+    #Il suffit de lancer le code pour que vous puissiez faire tourner ce que vous souhaitez
     choix = int(input("Voulez vous faire tourner la partie 1 ou la partie 2 (1 ou 2) ?"))
     if choix==1:
         paillier = Paillier()
